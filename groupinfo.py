@@ -9,9 +9,9 @@ group_members = 2 				# Note, maximum supported is 3
 # Add all group members below. Use the same student order everywhere in your submission.
 
 # Group member 1: 
-group_member_1_name 			= '' 	        # Please enter your name
-group_member_1_number 	        = 's' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
-group_member_1_study 			= '' 	        # Please enter your study
+group_member_1_name 			= 'Sebastián León Medellín' 	        # Please enter your name
+group_member_1_number 	        = 's3984346' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
+group_member_1_study 			= 'Electrical Engineering' 	        # Please enter your study
 
 # Group member 2: 
 group_member_2_name 			= 'Wanting Hui' 	        # Please enter your name
