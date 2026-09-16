@@ -1,10 +1,10 @@
 # General information about your project group
 
 # Please enter your group number
-group_number = 0
+group_number = 5
 
 # Number of group members
-group_members = 0 				# Note, maximum supported is 3
+group_members = 2 				# Note, maximum supported is 3
 
 # Add all group members below. Use the same student order everywhere in your submission.
 
@@ -14,9 +14,9 @@ group_member_1_number 	        = 's' 	        # Please enter your student number
 group_member_1_study 			= '' 	        # Please enter your study
 
 # Group member 2: 
-group_member_2_name 			= '' 	        # Please enter your name
-group_member_2_number 	        = 's' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
-group_member_2_study 			= '' 	        # Please enter your study
+group_member_2_name 			= 'Wanting Hui' 	        # Please enter your name
+group_member_2_number 	        = 's3307530' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
+group_member_2_study 			= 'AM' 	        # Please enter your study
 
 # Group member 3 (leave empty if you have two group members): 
 group_member_3_name 			= '' 	        # Please enter your name
