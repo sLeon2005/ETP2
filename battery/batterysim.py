@@ -41,7 +41,24 @@ def batterysim(battery, planning):
     batpmax = battery.batpmax    
     tau = cfg_sim['tau']  
   
+    for i in range(0, len(planning)):
+        p = planning[i]
+        if p > batpmax:
+            p = max(batpmin, min(p, batpmax))
+        elif p < batpmin:
+            p = max(batpmin, min(p, batpmax))
 
+        next_soc = batsoc + tau * p
+        if next_soc > batcapacity:
+            p = (batcapacity - batsoc) / tau
+        elif next_soc < batminsoc:
+            p = (batminsoc - batsoc) / tau
+
+        p = max(batpmin, min(p, batpmax))
+        batsoc += tau * p
+        profile.append(p)
+
+    assert len(profile) == len(planning)
     # NOTE: The following variables help in the implementation of the code
     # NOTE: TREAT THESE VARIABLES AS READ-ONLY!
     

@@ -105,15 +105,23 @@ def evsim(ev, planning):
 
         if i == arrival_interval:
             # Moment at which the EV arrives
-            pass
+            evsoc -= evenergy
 
         if i >= arrival_interval and i < departure_interval:
             # Interval that the EV is connected (available)
-            pass
+            p = max(evpmin, min(planning[i], evpmax))
+            next_s = evsoc + tau * p
+            if next_s > evcapacity:
+                p = (evcapacity - evsoc) / tau
+            elif next_s < 0:
+                p = -evsoc / tau
+            p = max(evpmin, min(p, evpmax))
+            evsoc += tau * p
+            profile.append(p)
 
         else:
             # Interval that the EV is disconnected (unavailable)
-            pass
+            profile.append(0)
 
         if i == departure_interval:
             # Moment at which the EV departs
