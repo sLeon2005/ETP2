@@ -31,8 +31,9 @@ import random
 #   - With default settings this is 672 elements (7 days times 96 intervals (of 15 mins) per day)
 #   - Do not change the function definition on the next line
 def evprices(ev, prices, co2, profile):
-    # result parameter to be filled and returned in the end:
-    planning = []
+    # result parameter to be filled and returned in the end,
+    # initialize it as a list of zeroes:
+    planning = [0] * len(profile)
 
     # preparing local usage variables for the EV state:
     evsoc = ev.evsoc
@@ -44,7 +45,7 @@ def evprices(ev, prices, co2, profile):
     evarrivalhour = ev.evarrivalhour
     evconnectiontime = ev.evconnectiontime
     tau = cfg_sim['tau']
-  
+
 
     # NOTE: The following variables help in the implementation of the code
     # NOTE: TREAT THESE VARIABLES AS READ-ONLY!
@@ -66,24 +67,24 @@ def evprices(ev, prices, co2, profile):
     # Other input
     # The profile vector provides values in Watt for each discrete interval (to be complete, this is the average power consumption in W during an interval)
     # Negative values indicate overproduction.
-    
-   
+
+
 
     # FIXME: Placeholder implementation to run initial simulations
     ### PLEASE REMOVE THE CODE BELOW BETWEEN THE LINES AND CODE YOUR OWN IMPLEMENTATION ###
             
     #######################################################################################
-    first = True
-    for i in range(0, len(profile)):
-        if first:
-            print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evprices.py")
-            first = False
-        # Static charging at maximum power
-        planning.append(evpmax)
+    # first = True
+    # for i in range(0, len(profile)):
+    #     if first:
+    #         print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evprices.py")
+    #         first = False
+    #     # Static charging at maximum power
+    #     planning.append(evpmax)
     #######################################################################################
 
     # FIXME: IMPLEMENT YOUR OWN CODE BELOW IN THE FOR-LOOP
-    
+
 
 
     # Your task is to modify the code such that the list containing the planning is filled. 
@@ -122,21 +123,61 @@ def evprices(ev, prices, co2, profile):
         #       You do not necessarily need to use all if-constructs, but they are defined for your confenience if you wish to make use of them
         #       Keep the "pass" if you do not want to use one of the if-constructs, otherwise the pass command may be removed.
 
+        # Moment at which the EV arrives
         if i == arrival_interval:
-            # Moment at which the EV arrives
-            pass
+            # Substarct the energy of a driving session from the SoC of the EV
+            evsoc -= evenergy
 
-        if i >= arrival_interval and i < departure_interval:
-            # Interval that the EV is connected (available)
-            pass
+            # Energy needd to be charged to reach full SoC
+            energy_remaining = evcapacity - evsoc
 
-        else:
-            # Interval that the EV is disconnected (unavailable)
-            pass
+            # Make a list containing the index/price pairs for the intervals that the EV is connected
+            price_index_pairs = []
+            for j in range(arrival_interval, departure_interval):
+                price_index_pairs.append([prices[j], j])
 
-        if i == departure_interval:
-            # Moment at which the EV departs
-            pass
+            # Sort the list based on the price (first element of the pair)
+            price_index_pairs.sort()
+
+            # Calculate maxmimum energy that can be charged in one interval
+            max_energy_interval = evpmax * tau
+
+            for pair in price_index_pairs:
+
+                index = pair[1]
+
+                if energy_remaining < max_energy_interval:
+                    interval_energy = energy_remaining
+                else:
+                    interval_energy = max_energy_interval
+
+                # Plan the power to be charged in this interval
+                planning[index] = interval_energy / tau
+
+                # subtract the energy charged in this interval
+                energy_remaining -= interval_energy
+
+                # End the loop if no more energy needs to be charged
+                if energy_remaining <= 0:
+                    break
+
+            # Update the SoC to full after planning the charging
+            if energy_remaining > 0:
+                print("WARNING: EV could not be fully charged before departure")
+            else:
+                evsoc = evcapacity
+
+        # if i >= arrival_interval and i < departure_interval:
+        #     # Interval that the EV is connected (available)
+        #     pass
+
+        # else:
+        #     # Interval that the EV is disconnected (unavailable)
+        #     pass
+
+        # if i == departure_interval:
+        #     # Moment at which the EV departs
+        #     pass
 
         # NOTE: You will need to do two things:
         #       1. Update the SoC of the EV at the right time (see Lecture 2) by deducting the energy of a driving session
