@@ -73,13 +73,13 @@ def evself(ev, prices, co2, profile):
     ### PLEASE REMOVE THE CODE BELOW BETWEEN THE LINES AND CODE YOUR OWN IMPLEMENTATION ###
             
     #######################################################################################
-    first = True
-    for i in range(0, len(profile)):
-        if first:
-            print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evself.py")
-            first = False
+    #first = True
+    #for i in range(0, len(profile)):
+    #    if first:
+    #        print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evself.py")
+    #        first = False
         # Static charging at maximum power
-        planning.append(evpmax)
+    #    planning.append(evpmax)
     #######################################################################################
 
     # FIXME: IMPLEMENT YOUR OWN CODE BELOW IN THE FOR-LOOP
@@ -98,7 +98,7 @@ def evself(ev, prices, co2, profile):
     # For this assignment you will need to implement SoC bookkeeping yourself and ensure that it stays within capacity bounds 
     # Tip: Use the "evenergy" variable for this in your code
 
-
+    p_session = [0] * len(profile)
 
     # What is already given is to determine if the EV is connected to the charging station (at home) or not (driving)
     intervals_per_day = (3600 / cfg_sim['timebase']) * 24
@@ -125,7 +125,26 @@ def evself(ev, prices, co2, profile):
 
         if i == arrival_interval:
             # Moment at which the EV arrives
-            pass
+            evsoc -= evenergy
+            remaining_energy = evcapacity - evsoc
+
+            for j in range(arrival_interval, min(departure_interval, len(profile))):
+                if remaining_energy > 0:
+                    if profile[j] < 0:
+                        available_power = min(-profile[j], evpmax)
+                        charge_power = min(available_power, remaining_energy / tau)
+                        p_session[j] = charge_power
+                        remaining_energy -= tau * charge_power
+
+            for j in range(arrival_interval, min(departure_interval, len(profile))):
+                if remaining_energy > 0:
+                    available_power = evpmax - p_session[j]
+                    if available_power > 0:
+                        charge_power = min(available_power, remaining_energy / tau)
+                        p_session[j] += charge_power
+                        remaining_energy -= tau * charge_power
+
+            evsoc = evcapacity
 
         if i >= arrival_interval and i < departure_interval:
             # Interval that the EV is connected (available)
@@ -139,6 +158,7 @@ def evself(ev, prices, co2, profile):
             # Moment at which the EV departs
             pass
 
+        planning.append(p_session[i])
         # NOTE: You will need to do two things:
         #       1. Update the SoC of the EV at the right time (see Lecture 2) by deducting the energy of a driving session
         #       2. Create the code to optimize the power profile of the EV

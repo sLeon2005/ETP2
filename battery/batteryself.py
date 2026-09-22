@@ -78,14 +78,26 @@ def batteryself(battery, prices, co2, profile):
     ### PLEASE REMOVE THE CODE BELOW BETWEEN THE LINES AND CODE YOUR OWN IMPLEMENTATION ###
     
     #######################################################################################
-    first = True
-    for i in range(0, len(profile)):
-        if first:
-            print("WARNING: You have not removed the placeholder code from the battery optimization. Please read the comments in the code. See file battery/batteryself.py")
-            first = False
+    #first = True
+    #for i in range(0, len(profile)):
+    #    if first:
+    #        print("WARNING: You have not removed the placeholder code from the battery optimization. Please read the comments in the code. See file battery/batteryself.py")
+    #        first = False
         # Static charging at 0.0 W
-        planning.append(0.0)
+    #    planning.append(0.0)
     #######################################################################################
 
+    for i in range(0, len(profile)):
+        desired_power = -profile[i]
+        actual_power = max(batpmin, min(desired_power, batpmax))
+
+        if (batsoc + tau * actual_power) > batcapacity:
+            actual_power = (batcapacity - batsoc) / tau
+        if (batsoc + tau * actual_power) < batminsoc:
+            actual_power = (batminsoc - batsoc) / tau
+
+        actual_power = max(batpmin, min(actual_power, batpmax))
+        planning.append(actual_power)
+        batsoc += tau * actual_power
     # Finally, the resulting planning for the device must be returned
     return planning
