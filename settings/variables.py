@@ -81,9 +81,9 @@ cfg_houses = {
     # Fourth house, this is one of the houses to use for sizing
     3: {
         # PV configuration
-        "pvpanels":  7,  # Number of panels, integer
-        "pvazimuth": "southwest",  # Available options: east, southeast, south, southwest, west
-        "pvtilt":  20,  # Available options: 10, 15, 20, 25, 30, 35, 40, 45, 50
+        "pvpanels":  8,  # Number of panels, integer
+        "pvazimuth": "west",  # Available options: east, southeast, south, southwest, west
+        "pvtilt":  30,  # Available options: 10, 15, 20, 25, 30, 35, 40, 45, 50
 
         # Wind turbine configuration
         "winddiameter": 5,  # Diameter in metres

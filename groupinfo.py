@@ -29,7 +29,7 @@ group_member_3_study 			= '' 	        # Please enter your study
 # Optimization objectives
 optimize_greedy = True      # Given
 optimize_prices = True     # Price / cost minimization
-optimize_self = False       # 2-norm self consumption
+optimize_self = True       # 2-norm self consumption
 optimize_flat = False       # 2-norm minimization
 
 # Bonus
