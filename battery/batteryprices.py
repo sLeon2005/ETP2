@@ -32,18 +32,22 @@ import random
 #   - Do not change the function definition on the next line
 def batteryprices(battery, prices, co2, profile):
     # FIXME: This is a placeholder that needs to be implemented
-
+    n = len(prices)
     # result parameter:
-    planning = []
-
+    #planning = []
+    planning = [0]*n
     # preparing local usage variables for the battery state:
     batsoc = battery.batsoc        
     batminsoc = battery.batminsoc    
     batcapacity = battery.batcapacity   
     batpmin = battery.batpmin       
     batpmax = battery.batpmax    
-    tau = cfg_sim['tau']  
-  
+    tau = cfg_sim['tau']
+
+
+    soc = []
+    current_soc = batsoc
+    check = False
 
     # NOTE: The following variables help in the implementation of the code
     # NOTE: TREAT THESE VARIABLES AS READ-ONLY!
@@ -77,10 +81,50 @@ def batteryprices(battery, prices, co2, profile):
     
     #######################################################################################
 
-    for i in range(0, len(profile)):
-        planning.append(-profile[i])
+    #for i in range(0, len(profile)):
+    #    planning.append(-profile[i])
 
     #######################################################################################
+
+
+    for i in range(n):
+        if prices[i] < 0:
+            power = min(batpmax, (batcapacity - current_soc) / tau)
+        elif prices[i] > 0:
+            power = max(batpmin, (batminsoc - current_soc) / tau)
+        else:
+            power = 0
+
+        planning[i] = power
+        current_soc += tau * power
+        current_soc = max(batminsoc, min(batcapacity, current_soc))
+        soc.append(current_soc)
+
+    for k in range(n + 1):
+        check = False
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if prices[i] < prices[j]:
+                    delta = min((batpmax - planning[i]),(planning[j] - batpmin),((batcapacity - max(soc[i:j])) / tau))
+                    if delta > 0:
+                        planning[i] += delta
+                        planning[j] -= delta
+                        for l in range(i, j):
+                            soc[l] += tau * delta
+                        check = True
+
+                elif prices[i] > prices[j]:
+                    delta = min((planning[i] - batpmin),(batpmax - planning[j]),((min(soc[i:j]) - batminsoc) / tau))
+                    if delta > 0:
+                        planning[i] -= delta
+                        planning[j] += delta
+                        for l in range(i, j):
+                            soc[l] -= tau * delta
+                        check = True
+
+        if not check:
+            break
 
     # Finally, the resulting planning for the device must be returned
     return planning

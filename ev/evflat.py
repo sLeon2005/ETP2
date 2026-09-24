@@ -73,19 +73,19 @@ def evflat(ev, prices, co2, profile):
     ### PLEASE REMOVE THE CODE BELOW BETWEEN THE LINES AND CODE YOUR OWN IMPLEMNETATION ###
             
     #######################################################################################
-    first = True
-    for i in range(0, len(profile)):
-        if first:
-            print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evgflat.py")
-            first = False
+    #first = True
+    #for i in range(0, len(profile)):
+    #    if first:
+    #        print("WARNING: You have not removed the placeholder code from the EV optimization. Please read the comments in the code. See file ev/evgflat.py")
+    #        first = False
         # Static charging at maximum power
-        planning.append(evpmax)
+    #    planning.append(evpmax)
     #######################################################################################
 
     # FIXME: IMPLEMENT YOUR OWN CODE BELOW IN THE FOR-LOOP
-    
 
-
+    session_p = [0] * len(profile)
+    p_session = set()
     # Your task is to modify the code such that the list containing the planning is filled. 
     # This is also a list, with each value representing the power consumption (average) during an interval in Watts
     # The length of this list must be equal to the input vectors (i.e., prices, co2 and profile)
@@ -125,7 +125,40 @@ def evflat(ev, prices, co2, profile):
 
         if i == arrival_interval:
             # Moment at which the EV arrives
-            pass
+
+            if arrival_interval not in p_session:
+                evsoc -= evenergy
+                remaining_energy = max(evcapacity - evsoc, 0)
+
+                start_interval = max(0, arrival_interval)
+                end_interval = min(len(profile), departure_interval)
+
+
+                if remaining_energy > 0:
+
+                    lower = min((profile[j] + evpmin)for j in list(range(start_interval, end_interval)))
+                    upper = max((profile[j] + evpmax)for j in list(range(start_interval, end_interval)))
+
+                    for k in range(100):
+                        bisection = (upper+lower)/2
+                        charge = 0
+                        for j in list(range(start_interval, end_interval)):
+                            charge += max(evpmin, min(bisection-profile[j], evpmax))
+                        if charge < (remaining_energy/tau):
+                            lower = bisection
+                        elif charge >= (remaining_energy/tau):
+                            upper = bisection
+                        if (upper-lower) < 1e-9:
+                            break
+
+                    bisection = (upper+lower)/2
+                    for j in list(range(start_interval, end_interval)):
+                        session_p[j] = max(evpmin, min(bisection-profile[j], evpmax))
+
+            evsoc = evcapacity
+            p_session.add(arrival_interval)
+
+
 
         if i >= arrival_interval and i < departure_interval:
             # Interval that the EV is connected (available)
@@ -139,6 +172,7 @@ def evflat(ev, prices, co2, profile):
             # Moment at which the EV departs
             pass
 
+        planning.append(session_p[i])
         # NOTE: You will need to do two things:
         #       1. Update the SoC of the EV at the right time (see Lecture 2) by deducting the energy of a driving session
         #       2. Create the code to optimize the power profile of the EV

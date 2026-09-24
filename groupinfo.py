@@ -8,12 +8,12 @@ group_members = 2 				# Note, maximum supported is 3
 
 # Add all group members below. Use the same student order everywhere in your submission.
 
-# Group member 1: 
+# Group member 1:
 group_member_1_name 			= 'Sebastián León Medellín' 	        # Please enter your name
 group_member_1_number 	        = 's3984346' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
 group_member_1_study 			= 'Electrical Engineering' 	        # Please enter your study
 
-# Group member 2: 
+# Group member 2:
 group_member_2_name 			= 'Wanting Hui' 	        # Please enter your name
 group_member_2_number 	        = 's3307530' 	        # Please enter your student number - s1234567 (NOTE, 's' + 7 digits!)
 group_member_2_study 			= 'AM' 	        # Please enter your study
@@ -30,9 +30,9 @@ group_member_3_study 			= '' 	        # Please enter your study
 optimize_greedy = True      # Given
 optimize_prices = True     # Price / cost minimization
 optimize_self = True       # 2-norm self consumption
-optimize_flat = False       # 2-norm minimization
+optimize_flat = True       # 2-norm minimization
 
 # Bonus
-bonus_batteryprices = False # Assignment 15 is implemented and passes tests/testbatteryprices
-bonus_evflat = False        # Assignment 16 is implemented and is optimal
-bonus_batteryflat = False   # Assignment 17 is implemented and is optimal
+bonus_batteryprices = True # Assignment 15 is implemented and passes tests/testbatteryprices
+bonus_evflat = True        # Assignment 16 is implemented and is optimal
+bonus_batteryflat = True   # Assignment 17 is implemented and is optimal

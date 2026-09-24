@@ -34,8 +34,8 @@ def batteryflat(battery, prices, co2, profile):
     # FIXME: This is a placeholder that needs to be implemented
 
     # result parameter:
-    planning = []
-
+    planning = [0] * len(profile)
+    #planning = []
     # preparing local usage variables for the battery state:
     batsoc = battery.batsoc        
     batminsoc = battery.batminsoc    
@@ -77,6 +77,7 @@ def batteryflat(battery, prices, co2, profile):
     ### PLEASE REMOVE THE CODE BELOW BETWEEN THE LINES AND CODE YOUR OWN IMPLEMENTATION ###
     
     #######################################################################################
+    '''
     first = True
     for i in range(0, len(profile)):
         if first:
@@ -84,7 +85,84 @@ def batteryflat(battery, prices, co2, profile):
             first = False
         # Static charging at 0.0 W
         planning.append(0.0)
+    return planning
+    '''
     #######################################################################################
+
+    n = len(profile)
+
+    lower = min(profile[i] + batpmin for i in range(n))
+    upper = max(profile[i] + batpmax for i in range(n))
+
+    for k in range(100):
+        bisection = (lower + upper) / 2
+        total_power = 0
+        for i in range(n):
+            total_power += max(batpmin, min(bisection-profile[i], batpmax))
+
+        if total_power < (batcapacity - batsoc) / tau:
+            lower = bisection
+        else:
+            upper = bisection
+        if upper-lower < 1e-9:
+            break
+
+    bisection = (lower+upper)/2
+    session_p = [0]*n
+    for i in range(n):
+        session_p[i] = max(batpmin, min(bisection - profile[i], batpmax))
+
+    for i in range(n):
+        remaining_intervals = n - i - 1
+        if i == 0:
+            previous_soc = batsoc
+        else:
+            total = 0
+            for j in range(i):
+                total += planning[j]
+            previous_soc = batsoc+tau*total
+
+        minimum_soc = max(batminsoc, batcapacity - remaining_intervals * batpmax * tau)
+        maximum_soc = min(batcapacity, batcapacity - remaining_intervals * batpmin * tau)
+
+        desired_soc = previous_soc + tau * session_p[i]
+        next_soc = max(minimum_soc, min(desired_soc, maximum_soc))
+        planning[i] = max(batpmin, min(((next_soc - previous_soc) / tau), batpmax))
+
+    for k in range(100):
+        soc = [0]*n
+        soc_value = batsoc
+        for i in range(n):
+            soc_value += tau*planning[i]
+            soc[i] = soc_value
+
+        for i in range(n - 1):
+            a = profile[i] + planning[i]
+            b = profile[i+1] + planning[i+1]
+
+            if a < b:
+                delta = min(((b-a)/2),(batpmax-planning[i]),(planning[i+1]-batpmin),((batcapacity-soc[i])/tau))
+                if delta > 0:
+                    planning[i] += delta
+                    planning[i+1] -= delta
+                    soc[i] += tau*delta
+
+            elif a > b:
+                delta = min(((a - b) / 2), (planning[i] - batpmin), (batpmax - planning[i + 1]),
+                            ((soc[i] - batminsoc) / tau))
+                if delta > 0:
+                    planning[i] -= delta
+                    planning[i+1] += delta
+                    soc[i] -= tau*delta
+
+    for i in range(n):
+        planning[i] = max(batpmin,min(batpmax,planning[i]))
+
+
+
+
+
+
 
     # Finally, the resulting planning for the device must be returned
     return planning
